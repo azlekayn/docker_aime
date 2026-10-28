@@ -1,0 +1,26 @@
+diff --git a/titles/idac/index.py b/titles/idac/index.py
+index 118d3cb..5768094 100644
+--- a/titles/idac/index.py
++++ b/titles/idac/index.py
+@@ -115,8 +115,10 @@ class IDACServlet(BaseServlet):
+         return (
+             f"",
+             # requires http or else it defaults to https
+-            # f"http://{self.core_cfg.server.hostname}{t_port}/{game_ver}/",
+-            f"http://sega-initiald.net/{game_ver}/",
++            # idac-toolkit: advertise THIS server instead of the hardcoded
++            # sega-initiald.net, otherwise the game's GameServer auth fails and
++            # it drops to offline ("IsWanAvailable: NG").
++            f"http://{self.core_cfg.server.hostname}{t_port}/{game_ver}/",
+         )
+ 
+     async def render_POST(self, request: Request) -> Response:
+@@ -132,7 +134,7 @@ class IDACServlet(BaseServlet):
+             internal_ver = IDACConstants.VER_IDAC_SEASON_1
+         elif version >= 140 and version < 171:  # IDAC Season 2
+             internal_ver = IDACConstants.VER_IDAC_SEASON_2
+-        elif version >= 200 and version < 240:  # IDAC Season 3
++        elif version >= 200 and version < 340:  # IDAC Season 3+ (incl. 3.00.00 / v300)
+             internal_ver = IDACConstants.VER_IDAC_SEASON_3
+ 
+         header_application = self.decode_header(request.headers.get("application", ""))

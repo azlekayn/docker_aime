@@ -1,0 +1,22 @@
+diff --git a/core/aimedb.py b/core/aimedb.py
+index 3926b73..1fa7e37 100644
+--- a/core/aimedb.py
++++ b/core/aimedb.py
+@@ -89,7 +89,16 @@ class AimedbServlette():
+ 
+     async def process_data(self, data: bytes, reader: asyncio.StreamReader, writer: asyncio.StreamWriter) -> Optional[bytes]:
+         addr = writer.get_extra_info('peername')[0]
+-        cipher = AES.new(self.config.aimedb.key.encode(), AES.MODE_ECB)
++        self.logger.debug(f"RAW rx {data.hex()}")
++        # idac-toolkit: accept either a plain ASCII key or a hex string (optionally
++        # 0x-prefixed), so a binary/hex key from the community can be used directly.
++        raw_key = self.config.aimedb.key
++        hx = raw_key[2:] if raw_key.lower().startswith("0x") else raw_key
++        if len(hx) in (32, 48, 64) and all(c in "0123456789abcdefABCDEF" for c in hx):
++            key_bytes = bytes.fromhex(hx)
++        else:
++            key_bytes = raw_key.encode()
++        cipher = AES.new(key_bytes, AES.MODE_ECB)
+ 
+         try:
+             decrypted = cipher.decrypt(data)

@@ -1,0 +1,96 @@
+# docker_aime — deployable All.net server stack for Initial D THE ARCADE
+#
+# The whole stack: `app` (ARTEMiS: All.net + AimeDB + billing + matching + web
+# UI), `db` (MariaDB) and `memcached`.
+#
+# Quick start on any Docker host:
+#   1. cp .env.example .env      # then set IDAC_HOSTNAME (and AIMEDB_KEY if needed)
+#   2. docker compose up -d --build
+#
+# IDAC_HOSTNAME must be an address the arcade cabinets can reach — the LAN IP
+# of the Docker host (e.g. 192.168.1.10). Do NOT use 127.0.0.1.
+name: docker_aime
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ARTEMIS_REPO: ${ARTEMIS_REPO:-https://gitea.tendokyu.moe/Dniel97/artemis.git}
+        ARTEMIS_BRANCH: ${ARTEMIS_BRANCH:-idac}
+        ARTEMIS_COMMIT: ${ARTEMIS_COMMIT:-7d4d1e275f6196ef57ab9fc34a7460e370bf13f8}
+    image: docker_aime:latest
+    container_name: aime-server
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      memcached:
+        condition: service_started
+    volumes:
+      - ./config:/app/config
+      - aime-logs:/app/logs
+    environment:
+      # NOTE: ARTEMiS reads overrides as CFG_<module>_<path> with the module and
+      # keys in *lowercase* (see core/config.py:get_config_field). Keep them
+      # lowercase or the override is silently ignored and the YAML wins.
+      #
+      # --- core ---
+      CFG_core_server_listen_address: "0.0.0.0"
+      CFG_core_server_hostname: "${IDAC_HOSTNAME:-192.168.1.10}"
+      CFG_core_database_host: "ma.db"
+      CFG_core_database_memcached_host: "ma.memcached"
+      CFG_core_aimedb_key: "${AIMEDB_KEY:-Copyright(C)SEGA}"
+      # --- Initial D THE ARCADE (online battle matching address) ---
+      CFG_idac_server_matching_host: "${IDAC_HOSTNAME:-192.168.1.10}"
+    ports:
+      - "80:80"                     # allnet / title HTTP
+      - "8443:8443"                 # billing (HTTPS)
+      - "22345:22345"               # AimeDB
+      - "8080:8080"                 # web management UI (cards/profiles/rivals)
+      - "20000-20003:20000-20003"   # IDAC matching + echo + p2p
+    networks:
+      - aime
+
+  db:
+    image: mariadb:10.11
+    container_name: aime-db
+    hostname: ma.db
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: aime
+      MARIADB_USER: aime
+      MARIADB_PASSWORD: aime
+      MARIADB_ROOT_PASSWORD: AimeRootPassword
+    volumes:
+      # named volume: portable across Docker and Podman, no host permission issues
+      - aime-db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+    networks:
+      aime:
+        aliases:
+          - ma.db
+
+  memcached:
+    image: memcached:1.6.22-alpine3.18
+    container_name: aime-memcached
+    hostname: ma.memcached
+    restart: unless-stopped
+    command: ["memcached", "-m", "1024", "-I", "128m"]
+    networks:
+      aime:
+        aliases:
+          - ma.memcached
+
+networks:
+  aime:
+    driver: bridge
+
+volumes:
+  aime-db:
+  aime-logs:

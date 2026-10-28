@@ -1,0 +1,98 @@
+# Initial D THE ARCADE (SDGT) title config — Dniel97/artemis `idac` branch.
+# Supports both Season 2 and Season 3. matching_host is injected by setup.sh.
+
+server:
+  enable: True
+  loglevel: "info"
+  ssl: False
+  ssl_key: "cert/idac.key"
+  ssl_cert: "cert/idac.crt"
+  matching_host: "192.168.1.10"
+  port_matching: 20000
+  port_echo1: 20001
+  port_echo2: 20002
+  port_matching_p2p: 20003
+
+timerelease:
+  S2:
+    timerelease_no: 4
+    timerelease_avatar_gacha_no: 3
+  S3:
+    timerelease_no: 6
+    timerelease_avatar_gacha_no: 4
+
+collabo:
+  S2:
+    enable: True
+    collabo_id: 6
+  S3:
+    enable: True
+    collabo_id: 8
+
+stamp:
+  S2:
+    enable: False
+    open_dt: "2024-01-01 00:00:00"
+    close_dt: "2029-12-31 00:00:00"
+    enabled_stamps:
+      150:
+        - "touhou_remilia_scarlet"
+        - "touhou_flandre_scarlet"
+        - "touhou_sakuya_izayoi"
+  S3:
+    enable: False
+    open_dt: "2026-01-01 00:00:00"
+    close_dt: "2029-12-31 00:00:00"
+    enabled_stamps:
+      210:
+        - "touhou_remilia_scarlet"
+        - "touhou_flandre_scarlet"
+        - "touhou_sakuya_izayoi"
+
+timetrial:
+  S2:
+    enable: False
+    open_dt: "2024-01-01 00:00:00"
+    close_dt: "2029-12-31 00:00:00"
+    enabled_timetrials:
+      150: "touhou_remilia_scarlet"
+  S3:
+    enable: False
+    open_dt: "2024-01-01 00:00:00"
+    close_dt: "2029-12-31 00:00:00"
+    enabled_timetrials:
+      210: "touhou_remilia_scarlet"
+
+battle_gift:
+  S2:
+    enable: False
+    open_dt: "2024-01-01 00:00:00"
+    close_dt: "2029-12-31 00:00:00"
+    enabled_battle_gifts:
+      150: "touhou_1st"
+  S3:
+    enable: False
+    open_dt: "2024-01-01 00:00:00"
+    close_dt: "2029-12-31 00:00:00"
+    enabled_battle_gifts:
+      210: "touhou_1st"
+
+round:
+  S2:
+    enable: True
+    open_dt: "2024-01-01 00:00:00"
+    close_dt: "2029-02-28 00:00:00"
+    enabled_round: "round_S2R2"
+    last_round: "round_S2R1"
+  S3:
+    enable: True
+    open_dt: "2024-01-01 00:00:00"
+    close_dt: "2029-02-28 00:00:00"
+    open_round: True
+    enabled_round: "round_S3R1"
+    last_round: ""
+
+league_reward:
+  S3:
+    enable: True
+    enabled_league_reward: "league_reward_S3"
